@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-primary: #4a00e5;
+  --color-primary-container: #6338fd;
+  --color-primary-fixed: #e6deff;
+  --color-primary-fixed-dim: #c9beff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-container: #e4dcff;
+  --color-on-primary-fixed: #1b0063;
+  --color-on-primary-fixed-variant: #4500d8;
+  --color-inverse-primary: #c9beff;
+
+  --color-secondary: #5e5e5e;
+  --color-secondary-container: #e2e2e2;
+  --color-secondary-fixed: #e2e2e2;
+  --color-secondary-fixed-dim: #c6c6c6;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-container: #646464;
+  --color-on-secondary-fixed: #1b1b1b;
+  --color-on-secondary-fixed-variant: #474747;
+
+  --color-tertiary: #4c495f;
+  --color-tertiary-container: #646178;
+  --color-tertiary-fixed: #e4dffa;
+  --color-tertiary-fixed-dim: #c8c3dd;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-container: #e3def8;
+  --color-on-tertiary-fixed: #1b192c;
+  --color-on-tertiary-fixed-variant: #47445a;
+
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-surface: #f9f9fb;
+  --color-surface-bright: #f9f9fb;
+  --color-surface-dim: #d9dadc;
+  --color-surface-variant: #e2e2e4;
+  --color-surface-container: #edeef0;
+  --color-surface-container-low: #f3f3f5;
+  --color-surface-container-high: #e8e8ea;
+  --color-surface-container-highest: #e2e2e4;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-tint: #5e30f8;
+  --color-surface-grey: #F1F1F4;
+
+  --color-on-surface: #1a1c1d;
+  --color-on-surface-variant: #484456;
+  --color-on-background: #1a1c1d;
+  --color-background: #f9f9fb;
+  --color-inverse-surface: #2f3132;
+  --color-inverse-on-surface: #f0f0f2;
+
+  --color-outline: #797488;
+  --color-outline-variant: #c9c3d9;
+  --color-border-muted: #E2E8F0;
+  --color-text-subtle: #64748B;
+  --color-vibrant-blue: #3B82F6;
+
+  --font-family-sans: "Inter", sans-serif;
+  --font-family-mono: "JetBrains Mono", monospace;
+
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+
+  --spacing-stack-sm: 0.5rem;
+  --spacing-stack-md: 1rem;
+  --spacing-stack-lg: 1.25rem;
+  --spacing-gutter: 1.5rem;
+  --spacing-margin-page: 2rem;
+}
+
+@layer base {
+  body {
+    font-family: var(--font-family-sans);
+    background-color: var(--color-surface);
+    color: var(--color-on-surface);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
