@@ -3,7 +3,6 @@ import type { TranslationRequest, TranslationResult } from "./types";
 import { openAIProvider } from "./openai";
 import { anthropicProvider } from "./anthropic";
 import { customProvider } from "./custom";
-import { libreTranslateProvider } from "./libretranslate";
 import { googleProvider } from "./google";
 
 export type { TranslationRequest, TranslationResult } from "./types";
@@ -19,8 +18,6 @@ export async function translate(
       return anthropicProvider.translate(request, settings);
     case "custom":
       return customProvider.translate(request, settings);
-    case "libretranslate":
-      return libreTranslateProvider.translate(request, settings);
     case "google":
       return googleProvider.translate(request, settings);
     default:

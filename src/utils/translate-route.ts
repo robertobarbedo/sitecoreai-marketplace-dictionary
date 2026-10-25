@@ -86,6 +86,24 @@ export function openApiKey(
   }
 }
 
+/**
+ * Maps a provider's error status to a fixed message. The provider's own
+ * message and status are logged by the caller, never sent to the browser.
+ */
+export function providerErrorResponse(label: string, status: number | undefined): NextResponse {
+  let error: string;
+  if (status === 401 || status === 403) {
+    error = `${label} rejected the API key. Check it in Settings › Translations.`;
+  } else if (status === 429) {
+    error = `${label} rate limit or quota was exceeded. Try again later.`;
+  } else if (status === 400 || status === 404 || status === 422) {
+    error = `${label} rejected the request. Check the model name in Settings › Translations.`;
+  } else {
+    error = `${label} is unavailable. Try again later.`;
+  }
+  return NextResponse.json({ error }, { status: 502 });
+}
+
 /** Fetch with a timeout, for fixed provider hosts. */
 export function fetchProvider(url: string | URL, init: RequestInit): Promise<Response> {
   return fetch(url, { ...init, signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS) });

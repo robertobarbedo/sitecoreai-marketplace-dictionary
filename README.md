@@ -36,8 +36,8 @@ provider you configure; nothing is saved until you review it.
   description on one screen; missing language versions are created on save,
   and unsaved changes are guarded by a confirmation dialog.
 - **AI and machine translation** — translate one language or all missing
-  languages of an entry with OpenAI, Anthropic, Google Cloud Translation,
-  LibreTranslate or your own endpoint (see
+  languages of an entry with OpenAI, Anthropic, Google Cloud Translation or
+  your own endpoint (see
   [AI and machine translation](#ai-and-machine-translation)).
 - **Add entry** — enter a name and the key is derived from it using the
   configured key rule; the matching letter folder is preselected, and a
@@ -71,7 +71,7 @@ Browser (app iframe) -> Marketplace SDK -> SitecoreAI host
                         settings, publish
 
 Browser -> /api/translate/<provider> (this app's server, signed-in only)
-        -> OpenAI | Anthropic | Google | LibreTranslate | custom endpoint
+        -> OpenAI | Anthropic | Google | custom endpoint
 ```
 
 **Dictionary structure.** The dictionary root is `<site root>/Dictionary`.
@@ -181,8 +181,8 @@ Open **Settings** from the app header. There are three tabs:
 - **General** — key format (default camelCase), **Disable Auto-Format** and
   **Disable Deletion** (both off by default). Stored in the browser's
   `localStorage`, so they apply to that browser only.
-- **Translations** — the translation provider (default LibreTranslate, with
-  no server set), API keys, model names (defaults `gpt-5-nano` for OpenAI and
+- **Translations** — the translation provider (default OpenAI, with no key
+  set), API keys, model names (defaults `gpt-5-nano` for OpenAI and
   `claude-opus-5-5` for Anthropic) and URLs. Stored for the whole environment
   in `/sitecore/system/Modules/Marketplace/DictionaryEditor/TranslationSettings`,
   with API keys encrypted.
@@ -228,7 +228,6 @@ Translations**:
 | OpenAI | Generative AI | Phrase, source language, description, entry name, dictionary key, site name, target languages |
 | Anthropic (Claude) | Generative AI | Phrase, source language, description, entry name, dictionary key, site name, target languages |
 | Google Cloud Translation (v2) | Machine translation | Phrase, source language, target languages |
-| LibreTranslate | Machine translation | Phrase, source language, target languages, to the server the user enters (there is no default server) |
 | Custom endpoint | Whatever the endpoint uses | Phrase, source language, description, dictionary key, site name, target languages |
 
 Requests go from this app's server to the provider only when a user clicks
@@ -248,7 +247,7 @@ AI-generated or machine-translated.
   [`src/lib/marketplace-auth/README.md`](src/lib/marketplace-auth/README.md).
   Without `NEXT_PUBLIC_AUTH0_CLIENT_ID`, the dictionary still works but
   translation is unavailable.
-- **API keys:** the OpenAI, Anthropic, Google and LibreTranslate keys are
+- **API keys:** the OpenAI, Anthropic and Google keys are
   encrypted by the server (AES-256-GCM, key derived from
   `DICTIONARY_SECRET_ENCRYPTION_KEY` with HKDF-SHA256) before they are stored
   in the `TranslationSettings` item, and decrypted only on the server when a
@@ -256,7 +255,12 @@ AI-generated or machine-translated.
   store keys rather than storing them in plaintext. Keys stored in plaintext
   by earlier versions are encrypted automatically the next time the app
   loads. If the encryption key changes or is lost, users must enter their API
-  keys again. Anyone who can read the item sees only ciphertext.
+  keys again. Anyone who can read the item sees only ciphertext. Keys are
+  only ever sent to the fixed provider hosts (OpenAI, Anthropic, Google),
+  never to a user-supplied URL, so a sealed key cannot be redirected.
+- **Provider errors:** OpenAI and Anthropic error messages and status codes
+  are logged on the server only; the browser gets a fixed message (rejected
+  key, rate limit, rejected request or unavailable) with status 502.
 - **Data leaving SitecoreAI:** dictionary content goes only to your SitecoreAI
   environment through the host, except when a user clicks Translate, which
   sends the data listed in [AI and machine translation](#ai-and-machine-translation)
@@ -267,8 +271,8 @@ AI-generated or machine-translated.
   Material Symbols fonts from Google Fonts. If `NEXT_PUBLIC_GA_MEASUREMENT_ID`
   is set, Google Analytics receives page views with an `app_name` dimension;
   no content data is sent.
-- **User-supplied URLs:** the custom endpoint and LibreTranslate URLs must be
-  public http(s) addresses on port 80 or 443, with a host name (IP addresses
+- **User-supplied URLs:** the custom endpoint URL must be a
+  public http(s) address on port 80 or 443, with a host name (IP addresses
   are refused) and no credentials in the URL. The host must resolve only to
   public addresses: private, loopback, link-local, carrier-grade NAT,
   cloud-metadata and other reserved ranges are refused, and the check runs
@@ -289,7 +293,7 @@ AI-generated or machine-translated.
   convenience, not a permission; use Sitecore security to prevent deletion.
 - Assumes the dictionary root is `<site root>/Dictionary` and uses the
   standard Dictionary Folder and Dictionary Entry templates.
-- Google Cloud Translation and LibreTranslate receive only the language part
+- Google Cloud Translation receives only the language part
   of each code (for example `fr` for `fr-FR`), so regional variants are not
   distinguished. Google Cloud Translation v3 is not supported directly; use a
   custom endpoint.

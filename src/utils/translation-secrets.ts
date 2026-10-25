@@ -2,7 +2,7 @@ import type { TranslationSettings } from "@/src/types";
 import { authedFetch } from "@/src/lib/marketplace-auth/authedFetch";
 
 /** Settings fields that hold provider API keys; stored only in sealed form. */
-export const SECRET_FIELDS = ["openAIApiKey", "anthropicApiKey", "libreTranslateApiKey", "googleApiKey"] as const;
+export const SECRET_FIELDS = ["openAIApiKey", "anthropicApiKey", "googleApiKey"] as const;
 
 type SecretField = (typeof SECRET_FIELDS)[number];
 

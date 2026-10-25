@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
-import { fetchProvider, openApiKey, validateTranslateInput } from "@/src/utils/translate-route";
+import {
+  fetchProvider,
+  openApiKey,
+  providerErrorResponse,
+  validateTranslateInput,
+} from "@/src/utils/translate-route";
 
 const MODEL_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/;
 
@@ -96,27 +101,13 @@ Return ONLY a valid JSON object with a single key "translations" whose value is 
     );
 
     if (!openAIResponse.ok) {
-      const errorBody = await openAIResponse.text();
-      console.error("OpenAI API error:", openAIResponse.status, errorBody);
-
-      // Try to extract a human-readable message from OpenAI's error JSON
-      let openAIMessage = errorBody;
-      try {
-        const parsed = JSON.parse(errorBody);
-        if (parsed?.error?.message) {
-          openAIMessage = parsed.error.message;
-        }
-      } catch {
-        // keep raw body
-      }
-
-      return NextResponse.json(
-        {
-          error: `OpenAI returned ${openAIResponse.status}`,
-          detail: openAIMessage,
-        },
-        { status: openAIResponse.status }
+      // Log the body but don't return it: the browser only gets a fixed message
+      console.error(
+        "OpenAI API error:",
+        openAIResponse.status,
+        (await openAIResponse.text()).slice(0, 2000)
       );
+      return providerErrorResponse("OpenAI", openAIResponse.status);
     }
 
     const openAIData = await openAIResponse.json();

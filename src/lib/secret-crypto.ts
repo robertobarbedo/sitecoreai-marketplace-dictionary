@@ -1,8 +1,8 @@
 import { createCipheriv, createDecipheriv, hkdfSync, randomBytes } from "crypto";
 
 /**
- * Server-side sealing of translation provider API keys (OpenAI, Google,
- * LibreTranslate).
+ * Server-side sealing of translation provider API keys (OpenAI, Anthropic,
+ * Google).
  *
  * A key is only handled in plaintext here, on the server: when the user saves
  * it (/api/translate/seal) and when a translate route calls the provider.

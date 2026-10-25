@@ -31,15 +31,10 @@ import { cn } from "@/lib/utils";
 // OpenAI logo SVG path
 const OPENAI_ICON_PATH = "M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z";
 
-// LibreTranslate logo SVG path
-const LIBRETRANSLATE_ICON_PATH = "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-5-9h10v2H7v-2zm0 4h10v2H7v-2zm3-8h4v2h-4V7z";
-
 type Tab = "languages" | "general" | "translations";
 
 /** What each provider receives when the user clicks Translate (shown as the AI disclosure). */
 const PROVIDER_DISCLOSURE: Record<TranslationProviderType, string> = {
-  libretranslate:
-    "Machine translation. The phrase and target languages are sent to the LibreTranslate server you enter below.",
   openai:
     "Generative AI. The phrase, its description, entry name, dictionary key, site name and target languages are sent to OpenAI.",
   anthropic:
@@ -132,8 +127,6 @@ export function SettingsPage({
   const [anthropicApiKey, setAnthropicApiKey] = useState(DEFAULT_TRANSLATION_SETTINGS.anthropicApiKey);
   const [anthropicModel, setAnthropicModel] = useState(DEFAULT_TRANSLATION_SETTINGS.anthropicModel);
   const [customUrl, setCustomUrl] = useState(DEFAULT_TRANSLATION_SETTINGS.customUrl);
-  const [libreTranslateUrl, setLibreTranslateUrl] = useState(DEFAULT_TRANSLATION_SETTINGS.libreTranslateUrl);
-  const [libreTranslateApiKey, setLibreTranslateApiKey] = useState(DEFAULT_TRANSLATION_SETTINGS.libreTranslateApiKey);
   const [googleApiKey, setGoogleApiKey] = useState(DEFAULT_TRANSLATION_SETTINGS.googleApiKey);
   const [isLoadingTranslation, setIsLoadingTranslation] = useState(false);
   const [isSavingTranslation, setIsSavingTranslation] = useState(false);
@@ -221,8 +214,6 @@ export function SettingsPage({
         setAnthropicApiKey(ts.anthropicApiKey || "");
         setAnthropicModel(ts.anthropicModel || DEFAULT_TRANSLATION_SETTINGS.anthropicModel);
         setCustomUrl(ts.customUrl);
-        setLibreTranslateUrl(ts.libreTranslateUrl || "");
-        setLibreTranslateApiKey(ts.libreTranslateApiKey || "");
         setGoogleApiKey(ts.googleApiKey || "");
       } catch (e) {
         console.error("Error loading translation settings:", e);
@@ -297,15 +288,12 @@ export function SettingsPage({
         anthropicApiKey,
         anthropicModel: anthropicModel.trim() || DEFAULT_TRANSLATION_SETTINGS.anthropicModel,
         customUrl: customUrl.trim(),
-        libreTranslateUrl: libreTranslateUrl.trim(),
-        libreTranslateApiKey,
         googleApiKey,
       };
       const saved = await saveTranslationSettings(client!, sitecoreContextId, ts);
       // Keys come back encrypted; the inputs switch to "Saved"
       setOpenAIApiKey(saved.openAIApiKey);
       setAnthropicApiKey(saved.anthropicApiKey);
-      setLibreTranslateApiKey(saved.libreTranslateApiKey);
       setGoogleApiKey(saved.googleApiKey);
       showToast("Translation settings saved", "Your translation provider has been updated.", {
         variant: "success",
@@ -625,7 +613,6 @@ export function SettingsPage({
                       </label>
                       <div className="flex flex-col gap-2">
                         {([
-                          { id: "libretranslate" as TranslationProviderType, label: "LibreTranslate", icon: "libretranslate", description: "Open-source machine translation on a server you choose." },
                           { id: "openai" as TranslationProviderType, label: "OpenAI", icon: "openai", description: "Use OpenAI models to translate phrases automatically." },
                           { id: "anthropic" as TranslationProviderType, label: "Anthropic", icon: "auto_awesome", description: "Use Claude models to translate phrases automatically." },
                           { id: "google" as TranslationProviderType, label: "Google Translate", icon: "g_translate", description: "Use Google Cloud Translation API v2 for machine translation." },
@@ -653,12 +640,6 @@ export function SettingsPage({
                               {p.icon === "openai" ? (
                                 <Icon 
                                   path={OPENAI_ICON_PATH} 
-                                  size={0.833} 
-                                  className={cn("shrink-0", selected ? "text-primary" : "text-text-subtle")}
-                                />
-                              ) : p.icon === "libretranslate" ? (
-                                <Icon 
-                                  path={LIBRETRANSLATE_ICON_PATH} 
                                   size={0.833} 
                                   className={cn("shrink-0", selected ? "text-primary" : "text-text-subtle")}
                                 />
@@ -839,66 +820,6 @@ export function SettingsPage({
                                   </div>
                                 </div>
                               )}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* LibreTranslate Fields */}
-                      {translationProvider === "libretranslate" && (
-                        <div className="space-y-4">
-                          <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
-                            <Icon path={LIBRETRANSLATE_ICON_PATH} size={0.75} />
-                            LibreTranslate Configuration
-                          </h3>
-                          <div className="space-y-4 pl-6">
-                            <div>
-                              <label className="text-xs font-bold text-text-subtle block mb-1.5">
-                                Server URL
-                              </label>
-                              <Input
-                                type="url"
-                                value={libreTranslateUrl}
-                                onChange={(e) => setLibreTranslateUrl(e.target.value)}
-                                placeholder="https://libretranslate.example.com"
-                                className="max-w-[420px] text-sm"
-                              />
-                              <p className="text-[11px] text-text-subtle mt-1.5">
-                                The LibreTranslate instance to use for translations. It must be a public http(s) address on port 80 or 443.
-                              </p>
-                              <div className="mt-2.5 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5">
-                                <span className="material-symbols-outlined text-[16px] text-blue-600 mt-0.5 shrink-0">info</span>
-                                <div className="text-[11px] text-blue-800 leading-relaxed">
-                                  <p className="mb-1.5">
-                                    <strong>LibreTranslate is free and open-source</strong> for self-hosting. There is no default server: phrases go only to the server you enter here, so choose one you trust.
-                                  </p>
-                                  <p>
-                                    Want to self-host? Visit{" "}
-                                    <a 
-                                      href="https://libretranslate.com" 
-                                      target="_blank" 
-                                      rel="noopener noreferrer"
-                                      className="text-blue-700 underline hover:text-blue-900 font-semibold"
-                                    >
-                                      libretranslate.com
-                                    </a>
-                                    {" "}for installation instructions.
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                            <div>
-                              <label className="text-xs font-bold text-text-subtle block mb-1.5">
-                                API Key
-                              </label>
-                              <SecretInput
-                                value={libreTranslateApiKey}
-                                onChange={setLibreTranslateApiKey}
-                                className="max-w-[420px] font-mono text-xs"
-                              />
-                              <p className="text-[11px] text-text-subtle mt-1.5">
-                                Optional. Only required if the server enforces API key authentication.
-                              </p>
                             </div>
                           </div>
                         </div>

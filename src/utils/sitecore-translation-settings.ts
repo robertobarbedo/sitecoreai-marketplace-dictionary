@@ -15,6 +15,7 @@ import {
 import {
   type TranslationSettings,
   DEFAULT_TRANSLATION_SETTINGS,
+  TRANSLATION_PROVIDERS,
 } from "@/src/types";
 import {
   queryItemByPath,
@@ -43,10 +44,26 @@ async function readTranslationSettingsItem(
   if (!valueField?.value) return null;
 
   try {
-    return { ...DEFAULT_TRANSLATION_SETTINGS, ...JSON.parse(valueField.value) };
+    return normalizeTranslationSettings(JSON.parse(valueField.value));
   } catch {
     return null;
   }
+}
+
+/**
+ * Keeps only known fields, so settings from removed providers (LibreTranslate,
+ * including its stored key) are dropped and not written back on the next save.
+ */
+function normalizeTranslationSettings(stored: Partial<TranslationSettings>): TranslationSettings {
+  const settings = { ...DEFAULT_TRANSLATION_SETTINGS };
+  for (const field of Object.keys(settings) as (keyof TranslationSettings)[]) {
+    const value = stored?.[field];
+    if (typeof value === "string") (settings as Record<string, string>)[field] = value;
+  }
+  if (!(TRANSLATION_PROVIDERS as readonly string[]).includes(settings.provider)) {
+    settings.provider = DEFAULT_TRANSLATION_SETTINGS.provider;
+  }
+  return settings;
 }
 
 export async function loadTranslationSettings(

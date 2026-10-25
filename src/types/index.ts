@@ -67,7 +67,9 @@ export interface AppContext {
   [key: string]: unknown;
 }
 
-export type TranslationProviderType = "openai" | "anthropic" | "custom" | "libretranslate" | "google";
+export const TRANSLATION_PROVIDERS = ["openai", "anthropic", "google", "custom"] as const;
+
+export type TranslationProviderType = (typeof TRANSLATION_PROVIDERS)[number];
 
 export interface TranslationSettings {
   provider: TranslationProviderType;
@@ -76,20 +78,15 @@ export interface TranslationSettings {
   anthropicApiKey: string;
   anthropicModel: string;
   customUrl: string;
-  libreTranslateUrl: string;
-  libreTranslateApiKey: string;
   googleApiKey: string;
 }
 
 export const DEFAULT_TRANSLATION_SETTINGS: TranslationSettings = {
-  provider: "libretranslate",
+  provider: "openai",
   openAIApiKey: "",
   openAIModel: "gpt-5-nano",
   anthropicApiKey: "",
   anthropicModel: "claude-opus-5-5",
   customUrl: "",
-  // No default server: phrases only go to a server the user chose
-  libreTranslateUrl: "",
-  libreTranslateApiKey: "",
   googleApiKey: "",
 };

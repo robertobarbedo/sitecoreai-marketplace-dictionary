@@ -249,7 +249,6 @@ export function EntryEditor({
     if (translationSettings.provider === "openai") return !!translationSettings.openAIApiKey;
     if (translationSettings.provider === "anthropic") return !!translationSettings.anthropicApiKey;
     if (translationSettings.provider === "custom") return !!translationSettings.customUrl;
-    if (translationSettings.provider === "libretranslate") return !!translationSettings.libreTranslateUrl;
     if (translationSettings.provider === "google") return !!translationSettings.googleApiKey;
     return false;
   };

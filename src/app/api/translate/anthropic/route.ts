@@ -3,7 +3,11 @@ import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
 import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
-import { openApiKey, validateTranslateInput } from "@/src/utils/translate-route";
+import {
+  openApiKey,
+  providerErrorResponse,
+  validateTranslateInput,
+} from "@/src/utils/translate-route";
 
 const DEFAULT_MODEL = "claude-opus-5-5";
 const MODEL_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,63}$/;
@@ -111,11 +115,9 @@ Return one entry per target language. "languageCode" must be the BCP-47 code exa
       });
     } catch (error) {
       if (error instanceof Anthropic.APIError) {
+        // Log the message but don't return it: the browser only gets a fixed message
         console.error("Anthropic API error:", error.status, error.message);
-        return NextResponse.json(
-          { error: `Anthropic returned ${error.status ?? "an error"}`, detail: error.message },
-          { status: error.status && error.status >= 400 ? error.status : 502 }
-        );
+        return providerErrorResponse("Anthropic", error.status);
       }
       throw error;
     }
