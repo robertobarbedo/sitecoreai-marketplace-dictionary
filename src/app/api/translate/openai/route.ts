@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
 import {
   fetchProvider,
   openApiKey,
   providerErrorResponse,
+  runTranslateRoute,
+  sanitizeTranslations,
   validateTranslateInput,
 } from "@/src/utils/translate-route";
 
@@ -23,17 +24,9 @@ interface TranslateRequestBody {
   targetLanguages: string[];
 }
 
-interface TranslationResult {
-  languageCode: string;
-  translation: string;
-}
-
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const auth = await requireSitecoreUser(req);
-  if (!auth.ok) return auth.response;
-
-  try {
-    const body: TranslateRequestBody = await req.json();
+export function POST(req: NextRequest): Promise<NextResponse> {
+  return runTranslateRoute(req, "openai", async (raw) => {
+    const body = raw as unknown as TranslateRequestBody;
 
     const {
       apiKey,
@@ -124,7 +117,7 @@ Return ONLY a valid JSON object with a single key "translations" whose value is 
     }
 
     // Handle both { translations: [...] } and direct array responses
-    let results: TranslationResult[];
+    let results: unknown;
     if (Array.isArray(parsed)) {
       results = parsed;
     } else if (
@@ -133,7 +126,7 @@ Return ONLY a valid JSON object with a single key "translations" whose value is 
       "translations" in parsed &&
       Array.isArray((parsed as Record<string, unknown>).translations)
     ) {
-      results = (parsed as { translations: TranslationResult[] }).translations;
+      results = (parsed as { translations: unknown }).translations;
     } else {
       return NextResponse.json(
         { error: "Unexpected response structure from OpenAI" },
@@ -141,12 +134,7 @@ Return ONLY a valid JSON object with a single key "translations" whose value is 
       );
     }
 
-    return NextResponse.json(results);
-  } catch (error) {
-    console.error("Translation route error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+    // Model output is passed on as plain strings only
+    return NextResponse.json(sanitizeTranslations(results, targetLanguages));
+  });
 }

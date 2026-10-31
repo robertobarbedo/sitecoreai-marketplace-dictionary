@@ -156,11 +156,11 @@ deployment URL of your App Studio app to the public HTTPS URL.
 | `NEXT_PUBLIC_AUTH0_CLIENT_ID` | Yes | Client ID of the app's Single-page app client credentials. Without it, sign-in is not configured and translation is unavailable. Public, inlined at build time. |
 | `NEXT_PUBLIC_SITECORE_APP_ID` | Yes | Marketplace app ID, sent as `product_codes=mkp_<id>` at sign-in. Public, inlined at build time. |
 | `DICTIONARY_SECRET_ENCRYPTION_KEY` | Yes | Server-only secret (16+ characters) used to encrypt provider API keys. Generate one with `openssl rand -base64 32`. Changing it means users must re-enter their API keys. |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | No | Google Analytics 4 measurement ID (`G-XXXXXXXXXX`). Leave empty to disable analytics. Public, inlined at build time. |
 | `NEXT_PUBLIC_AUTH0_DOMAIN` | No | Defaults to `auth.sitecorecloud.io`. |
 | `NEXT_PUBLIC_AUTH0_AUDIENCE` | No | Defaults to `https://api-webapp.sitecorecloud.io`. |
 | `NEXT_PUBLIC_AUTH0_SCOPE` | No | Defaults to `openid profile email offline_access`. |
 | `AUTH0_ISSUER` | No | Token issuer checked by the server. Defaults to `https://auth.sitecorecloud.io/`. |
+| `CSP_FRAME_ANCESTORS` | No | Space-separated CSP sources allowed to embed the app (`Content-Security-Policy: frame-ancestors`). Defaults to `'self' https://*.sitecorecloud.io`. |
 
 Copy [`.env.example`](.env.example) to `.env.local` to set them locally. Only
 override the Auth0 defaults if Sitecore changes them.
@@ -225,16 +225,27 @@ Translations**:
 
 | Provider | Type | Data sent when the user clicks Translate |
 | --- | --- | --- |
-| OpenAI | Generative AI | Phrase, source language, description, entry name, dictionary key, site name, target languages |
-| Anthropic (Claude) | Generative AI | Phrase, source language, description, entry name, dictionary key, site name, target languages |
-| Google Cloud Translation (v2) | Machine translation | Phrase, source language, target languages |
-| Custom endpoint | Whatever the endpoint uses | Phrase, source language, description, dictionary key, site name, target languages |
+| OpenAI (default model `gpt-5-nano`) | Generative AI | Phrase, source language, description, entry name, dictionary key, site and dictionary name, target languages |
+| Anthropic (Claude, default model `claude-opus-5-5`) | Generative AI | Phrase, source language, description, entry name, dictionary key, site and dictionary name, target languages |
+| Google Cloud Translation (v2) | Machine translation (non-generative) | Phrase, source language, target languages |
+| Custom endpoint | Whatever the endpoint uses | Phrase, source language, description, dictionary key, site and dictionary name, target languages |
 
-Requests go from this app's server to the provider only when a user clicks
-Translate. Results are put into the editor and are not saved until the user
-reviews them and clicks Save. Automatic translations can be wrong. The app
-shows this notice in Settings and in the entry editor, and labels results as
-AI-generated or machine-translated.
+- **When:** requests go from this app's server to the provider only when a
+  user clicks Translate, one phrase per request.
+- **Your key, your terms:** each organization uses its own provider account
+  and API key, stored encrypted. The provider processes the request under
+  that account and its API terms; the publisher does not store phrases or
+  results and does not use them to train any model.
+- **Human review:** results are put into the editor as plain text and are
+  not saved until the user reviews them and clicks Save.
+- **Transparency:** automatic translations can be wrong or culturally off.
+  The app shows this notice in Settings and in the entry editor, says what
+  each provider receives, and labels results as AI-generated or
+  machine-translated.
+
+The full disclosure (data, security, EU AI Act, GDPR/CCPA and human
+oversight) is in the [AI usage disclosure](DATA-USAGE.md#ai-usage-disclosure),
+and the rules for using the feature are in the [Terms of service](TERMS.md).
 
 ## Security and privacy
 
@@ -258,6 +269,9 @@ AI-generated or machine-translated.
   keys again. Anyone who can read the item sees only ciphertext. Keys are
   only ever sent to the fixed provider hosts (OpenAI, Anthropic, Google),
   never to a user-supplied URL, so a sealed key cannot be redirected.
+- **Model output:** only string `languageCode` / `translation` pairs for
+  the requested languages are passed back to the browser, and they are shown
+  in text fields, never rendered as HTML.
 - **Provider errors:** OpenAI and Anthropic error messages and status codes
   are logged on the server only; the browser gets a fixed message (rejected
   key, rate limit, rejected request or unavailable) with status 502.
@@ -267,10 +281,20 @@ AI-generated or machine-translated.
   through this app's server to the chosen provider, under that provider's
   terms. The Google key is sent in the `X-Goog-Api-Key` header, never in the
   URL.
-- **Third-party assets:** the page loads the Inter, JetBrains Mono and
-  Material Symbols fonts from Google Fonts. If `NEXT_PUBLIC_GA_MEASUREMENT_ID`
-  is set, Google Analytics receives page views with an `app_name` dimension;
-  no content data is sent.
+- **No third-party assets or analytics:** fonts (Inter, JetBrains Mono and
+  Material Symbols) are bundled with the app and served from the deployment,
+  so the page makes no requests to Google Fonts or any other third party.
+  The app uses no analytics or tracking.
+- **Security headers:** every response sets HSTS,
+  `Content-Security-Policy: frame-ancestors` (only SitecoreAI may embed the
+  app, configurable with `CSP_FRAME_ANCESTORS`), `X-Content-Type-Options`,
+  `Referrer-Policy` and `Permissions-Policy`; `/api` responses are
+  `Cache-Control: no-store`.
+- **Audit log:** sign-in decisions, translation requests (`translate`:
+  provider, outcome, phrase and character counts, target language codes)
+  and API key sealing (`secret.seal`) are written as JSON audit lines with
+  UTC timestamps to the server log. They never contain tokens, API keys,
+  secrets, phrases or translations.
 - **User-supplied URLs:** the custom endpoint URL must be a
   public http(s) address on port 80 or 443, with a host name (IP addresses
   are refused) and no credentials in the URL. The host must resolve only to
@@ -280,8 +304,16 @@ AI-generated or machine-translated.
   address that was checked. Redirects are not followed, and
   requests time out after 20 seconds. Upstream error bodies are not passed
   back to the browser.
-- **Input limits:** phrases are capped at 5,000 characters, descriptions at
-  2,000 and a request at 50 target languages.
+- **Input limits:** each request carries one phrase of at most 5,000
+  characters, a description of at most 2,000, context fields (site,
+  dictionary and entry name, key) of at most 500 and at most 50 target
+  languages; anything else is refused with a 400 error.
+- **Rate limit:** each signed-in user can make 30 translation requests (and
+  30 key-sealing requests) per minute; further requests get a 429 error.
+- **Policies:** [Privacy policy](PRIVACY.md),
+  [Terms of service](TERMS.md),
+  [Data usage disclosure](DATA-USAGE.md) and
+  [Security policy](SECURITY.md).
 
 ## Limitations
 
@@ -298,14 +330,18 @@ AI-generated or machine-translated.
   distinguished. Google Cloud Translation v3 is not supported directly; use a
   custom endpoint.
 - Translation requires custom authorization to be set up on the deployment.
+- The translation rate limit is kept in memory per server instance, so it is
+  not shared between instances and resets when an instance restarts; it
+  stops a runaway client, not a determined one. Provider quotas still apply.
 
 ## Development
 
 - Next.js 15 (App Router), React 19, TypeScript.
 - Tailwind CSS v4 and Radix UI primitives, with icons from Material Symbols
-  and `@mdi/js`.
-- Sitecore Marketplace SDK (`@sitecore-marketplace-sdk/client` and
-  `@sitecore-marketplace-sdk/xmc`).
+  (self-hosted from the `material-symbols` package) and `@mdi/js`. Inter
+  and JetBrains Mono are self-hosted with `next/font`.
+- Sitecore Marketplace SDK (`@sitecore-marketplace-sdk/client` 0.4 and
+  `@sitecore-marketplace-sdk/xmc` 0.4).
 - Server: Anthropic SDK, `jose` for token verification, `ipaddr.js` for the
   URL guard, `zod` for response validation.
 - `npm run dev` starts the dev server on port 5002.
@@ -313,7 +349,6 @@ AI-generated or machine-translated.
 ```
 src/
   app/           Root layout, the single page (/) and /api/translate/* routes
-  components/    Google Analytics loader
   lib/           marketplace-auth kit, API key encryption
   utils/         GraphQL helpers, settings, key rules, translation providers,
                  URL guard, SDK hook
@@ -324,8 +359,13 @@ docs/            Screenshots
 
 ## Support
 
-Report bugs and request features by opening an issue in this repository.
+Report bugs and request features in
+[GitHub Issues](https://github.com/robertobarbedo/sitecoreai-marketplace-dictionary/issues).
+Report security issues as described in the [Security policy](SECURITY.md).
 This is a community app and is not an official Sitecore product.
+
+See also the [Privacy policy](PRIVACY.md), [Terms of service](TERMS.md) and
+[Data usage disclosure](DATA-USAGE.md).
 
 ## License
 

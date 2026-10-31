@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import { z } from "zod";
-import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
 import {
   openApiKey,
   providerErrorResponse,
+  runTranslateRoute,
+  sanitizeTranslations,
   validateTranslateInput,
 } from "@/src/utils/translate-route";
 
@@ -44,12 +45,9 @@ interface TranslateRequestBody {
   targetLanguages: string[];
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const auth = await requireSitecoreUser(req);
-  if (!auth.ok) return auth.response;
-
-  try {
-    const body: TranslateRequestBody = await req.json();
+export function POST(req: NextRequest): Promise<NextResponse> {
+  return runTranslateRoute(req, "anthropic", async (raw) => {
+    const body = raw as unknown as TranslateRequestBody;
 
     const {
       apiKey,
@@ -135,12 +133,9 @@ Return one entry per target language. "languageCode" must be the BCP-47 code exa
       );
     }
 
-    return NextResponse.json(response.parsed_output.translations);
-  } catch (error) {
-    console.error("Anthropic translation route error:", error);
+    // Model output is passed on as plain strings only
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      sanitizeTranslations(response.parsed_output.translations, targetLanguages)
     );
-  }
+  });
 }

@@ -59,8 +59,8 @@
   --color-text-subtle: #64748B;
   --color-vibrant-blue: #3B82F6;
 
-  --font-family-sans: "Inter", sans-serif;
-  --font-family-mono: "JetBrains Mono", monospace;
+  --font-family-sans: var(--font-inter), "Inter", sans-serif;
+  --font-family-mono: var(--font-jetbrains-mono), "JetBrains Mono", monospace;
 
   --radius-sm: 0.125rem;
   --radius-md: 0.25rem;

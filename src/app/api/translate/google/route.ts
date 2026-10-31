@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireSitecoreUser } from "@/src/lib/marketplace-auth/server";
-import { fetchProvider, openApiKey, validateTranslateInput } from "@/src/utils/translate-route";
+import {
+  fetchProvider,
+  openApiKey,
+  runTranslateRoute,
+  validateTranslateInput,
+} from "@/src/utils/translate-route";
 
 interface GoogleTranslateRequestBody {
   /** Sealed by /api/translate/seal */
@@ -19,12 +23,9 @@ function toIso639(code: string): string {
   return code.split("-")[0].toLowerCase();
 }
 
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const auth = await requireSitecoreUser(req);
-  if (!auth.ok) return auth.response;
-
-  try {
-    const body: GoogleTranslateRequestBody = await req.json();
+export function POST(req: NextRequest): Promise<NextResponse> {
+  return runTranslateRoute(req, "google", async (raw) => {
+    const body = raw as unknown as GoogleTranslateRequestBody;
     const { googleApiKey, phrase, baseLanguage, targetLanguages } = body;
 
     if (!googleApiKey) {
@@ -70,7 +71,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         }
 
         const data = await response.json();
-        const translatedText = data?.data?.translations?.[0]?.translatedText ?? "";
+        const translatedText = data?.data?.translations?.[0]?.translatedText;
+        if (typeof translatedText !== "string") return null;
         
         return {
           languageCode: langCode,
@@ -95,11 +97,5 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     return NextResponse.json(results);
-  } catch (error) {
-    console.error("Google Translate route error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
+  });
 }

@@ -36,13 +36,13 @@ type Tab = "languages" | "general" | "translations";
 /** What each provider receives when the user clicks Translate (shown as the AI disclosure). */
 const PROVIDER_DISCLOSURE: Record<TranslationProviderType, string> = {
   openai:
-    "Generative AI. The phrase, its description, entry name, dictionary key, site name and target languages are sent to OpenAI.",
+    "Generative AI. The phrase, its source language and description, entry name, dictionary key, site and dictionary name, and target languages are sent to OpenAI.",
   anthropic:
-    "Generative AI. The phrase, its description, entry name, dictionary key, site name and target languages are sent to Anthropic (Claude).",
+    "Generative AI. The phrase, its source language and description, entry name, dictionary key, site and dictionary name, and target languages are sent to Anthropic (Claude).",
   google:
-    "Machine translation. The phrase and target languages are sent to Google Cloud Translation.",
+    "Machine translation. The phrase, its source language and the target languages are sent to Google Cloud Translation.",
   custom:
-    "The phrase, its description, dictionary key, site name and target languages are sent to the endpoint you enter below, which may use AI or machine translation.",
+    "The phrase, its source language and description, dictionary key, site and dictionary name, and target languages are sent to the endpoint you enter below, which may use AI or machine translation.",
 };
 
 /**
