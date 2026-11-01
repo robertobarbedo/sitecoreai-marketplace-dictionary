@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* Font families loaded from @fontsource in layout.tsx */
+:root {
+  --font-inter: "Inter";
+  --font-jetbrains-mono: "JetBrains Mono";
+}
+
 @theme inline {
   --color-primary: #4a00e5;
   --color-primary-container: #6338fd;
