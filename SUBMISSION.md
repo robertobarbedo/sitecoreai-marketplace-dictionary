@@ -1,7 +1,7 @@
 # Marketplace submission: Dictionary Editor
 
 Copy-paste text for Sitecore's public-app submission form, in form order.
-Replace every `{{...}}` placeholder before submitting.
+Replace `{{APP_URL}}` with the production deployment URL before submitting.
 
 ## 1. App name
 
@@ -64,7 +64,7 @@ PNG, shown as 600×900 thumbnails. Capture during live QA. `docs/Entry list.png`
 
 ## 8. Data usage disclosure
 
-Paste from `DATA-USAGE.md` (replace `rb205@proton.me` in it first).
+Paste from `DATA-USAGE.md`.
 
 Summary: dictionary content is read and written through the Marketplace SDK with the user's own permissions, and settings are stored as items in the customer's own environment; the app has no database. The app's server is used only when a user clicks Translate: it forwards one phrase and its context to the provider the customer configured, with the customer's own encrypted API key, and keeps nothing. Server audit logs (no phrases, translations, tokens or keys) are kept for 90 days.
 
@@ -114,4 +114,4 @@ Next.js lists sharp (LGPL-3.0 libvips) as an optional dependency for image optim
 - [ ] Production client credentials registered with `{{APP_URL}}` callback, logout, web origin and CORS URLs
 - [ ] AI usage disclosure switch set to On with the DATA-USAGE.md AI section
 - [ ] Screenshots captured (PNG)
-- [ ] `rb205@proton.me` replaced in DATA-USAGE.md, PRIVACY.md, TERMS.md, SECURITY.md; `Roberto Barbedo`, `rb205@proton.me`, `{{APP_URL}}` replaced in this form
+- [ ] `{{APP_URL}}` replaced with the production deployment URL in this form

@@ -339,7 +339,7 @@ and the rules for using the feature are in the [Terms of service](TERMS.md).
 - Next.js 15 (App Router), React 19, TypeScript.
 - Tailwind CSS v4 and Radix UI primitives, with icons from Material Symbols
   (self-hosted from the `material-symbols` package) and `@mdi/js`. Inter
-  and JetBrains Mono are self-hosted with `next/font`.
+  and JetBrains Mono are self-hosted from the `@fontsource` packages.
 - Sitecore Marketplace SDK (`@sitecore-marketplace-sdk/client` 0.4 and
   `@sitecore-marketplace-sdk/xmc` 0.4).
 - Server: Anthropic SDK, `jose` for token verification, `ipaddr.js` for the
@@ -369,4 +369,4 @@ See also the [Privacy policy](PRIVACY.md), [Terms of service](TERMS.md) and
 
 ## License
 
-Licensed under the Apache License 2.0 — see [LICENSE](LICENSE)..
+Licensed under the Apache License 2.0 — see [LICENSE](LICENSE).
