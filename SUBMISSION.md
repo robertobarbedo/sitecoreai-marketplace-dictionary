@@ -86,7 +86,7 @@ Summary: dictionary content is read and written through the Marketplace SDK with
   - `NEXT_PUBLIC_SITECORE_APP_ID` (required)
   - `DICTIONARY_SECRET_ENCRYPTION_KEY` (required; server-only, 16+ characters, `openssl rand -base64 32`)
   - Optional: `NEXT_PUBLIC_AUTH0_DOMAIN`, `NEXT_PUBLIC_AUTH0_AUDIENCE`, `NEXT_PUBLIC_AUTH0_SCOPE`, `AUTH0_ISSUER`, `CSP_FRAME_ANCESTORS`
-- App logo: `icon-dictionary.svg`
+- App logo: `translate-duotone.svg`
 
 ## 11. Submission details (visible only to Sitecore)
 
