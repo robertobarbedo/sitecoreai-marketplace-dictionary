@@ -91,7 +91,7 @@ Summary: dictionary content is read and written through the Marketplace SDK with
 ## 11. Submission details (visible only to Sitecore)
 
 - Contact name: `Roberto Barbedo`
-- Contact email: `rb205@proton.me`
+- Contact email: `roberto.barbedo@msqdx.com`
 
 **App functionality**
 
