@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, type ReactNode } from "react";
 import { useMarketplaceClient } from "@/src/utils/hooks/useMarketplaceClient";
 import { MarketplaceAuthProvider } from "@/src/lib/marketplace-auth/AuthProvider";
 import {
-  getSitecoreContextId,
   querySites,
   queryAllLanguages,
   querySiteSupportedLanguageIds,
@@ -16,10 +15,20 @@ import {
   fetchAllDictionaryEntries,
 } from "@/src/utils/sitecore-graphql";
 import { loadSettings } from "@/src/utils/sitecore-settings";
+import {
+  pickEnvironment,
+  readEnvironments,
+  switchEnvironment,
+  type EnvironmentOption,
+} from "@/src/utils/environment";
 import { loadGeneralSettings } from "@/src/utils/general-settings";
 import { loadTranslationSettings, saveTranslationSettings } from "@/src/utils/sitecore-translation-settings";
 import { hasPlaintextSecrets } from "@/src/utils/translation-secrets";
-import { DEFAULT_LANGUAGE, DEFAULT_PAGE_SIZE } from "@/src/constants";
+import {
+  DEFAULT_LANGUAGE,
+  DEFAULT_PAGE_SIZE,
+  ENVIRONMENT_STORAGE_KEY,
+} from "@/src/constants";
 import type { Site, DictionaryFolder, DictionaryEntry, DictionarySettings, SitecoreItem, LanguageItem, TranslationSettings } from "@/src/types";
 import { DEFAULT_SETTINGS, DEFAULT_TRANSLATION_SETTINGS } from "@/src/types";
 import { SiteSelector } from "@/components/site-selector";
@@ -34,6 +43,10 @@ import { PublishDialog } from "@/components/publish-dialog";
 import { SettingsPage } from "@/components/settings-page";
 import { DeleteConfirmationDialog } from "@/components/delete-confirmation-dialog";
 import { Button } from "@/components/ui/button";
+import {
+  EnvironmentBar,
+  EnvironmentChooser,
+} from "@/components/environment-picker";
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "@/components/ui/toast";
 import type { ApplicationContext, ClientSDK } from "@sitecore-marketplace-sdk/client";
 
@@ -74,6 +87,8 @@ export default function DictionaryEditorPage() {
   const [appContext, setAppContext] = useState<ApplicationContext>();
   const withAuth = (view: ReactNode) => <AuthBoundary appContext={appContext}>{view}</AuthBoundary>;
 
+  const [environments, setEnvironments] = useState<EnvironmentOption[]>([]);
+  const [environment, setEnvironment] = useState<EnvironmentOption | null>(null);
   const [sitecoreContextId, setSitecoreContextId] = useState("");
   const [sites, setSites] = useState<Site[]>([]);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
@@ -143,12 +158,19 @@ export default function DictionaryEditorPage() {
     if (!client) return;
 
     async function init(c: ClientSDK) {
-      c.query("application.context")
-        .then((res) => setAppContext(res.data))
-        .catch((e) => console.error("Error retrieving application.context:", e));
-
       try {
-        const contextId = await getSitecoreContextId(c);
+        const contextResponse = await c.query("application.context");
+        setAppContext(contextResponse.data);
+
+        // One environment (Full Screen): use it. Several (Standalone): the
+        // one picked last time, otherwise the chooser is shown.
+        const available = readEnvironments(contextResponse.data);
+        setEnvironments(available);
+        const picked = pickEnvironment(available, ENVIRONMENT_STORAGE_KEY);
+        setEnvironment(picked);
+        if (!picked && available.length > 1) return;
+
+        const contextId = picked?.contextId ?? "";
         setSitecoreContextId(contextId);
 
         const [sitesData, languageItems, translationConfig] = await Promise.all([
@@ -547,6 +569,23 @@ export default function DictionaryEditorPage() {
     setSettingsRefreshKey((k) => k + 1);
   };
 
+  const chooseEnvironment = (next: EnvironmentOption) =>
+    switchEnvironment(next, ENVIRONMENT_STORAGE_KEY);
+
+  // Standalone, first open: several environments and none picked yet
+  if (!environment && environments.length > 1) {
+    return withAuth(
+      <main className="p-(--spacing-margin-page) min-h-screen bg-surface-bright">
+        <div className="max-w-[1280px] mx-auto">
+          <EnvironmentChooser
+            environments={environments}
+            onSelect={chooseEnvironment}
+          />
+        </div>
+      </main>
+    );
+  }
+
   // Settings page view
   if (showSettings && client && selectedSite) {
     return withAuth(
@@ -633,6 +672,13 @@ export default function DictionaryEditorPage() {
     <ToastProvider>
       <main className="p-(--spacing-margin-page) min-h-screen bg-surface-bright">
         <div className="max-w-[1280px] mx-auto space-y-5">
+          {environment && (
+            <EnvironmentBar
+              environments={environments}
+              selected={environment}
+              onSelect={chooseEnvironment}
+            />
+          )}
           {/* Line 1: Site Selection & Primary Actions */}
           <div className="flex items-center justify-between">
             <SiteSelector

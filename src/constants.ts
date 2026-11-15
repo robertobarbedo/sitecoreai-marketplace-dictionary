@@ -191,3 +191,6 @@ export const LETTER_FOLDERS = [
 ] as const;
 
 export const DEFAULT_PAGE_SIZE = 15;
+
+/** localStorage key of the environment picked when the host offers several. */
+export const ENVIRONMENT_STORAGE_KEY = "sitecoreai-dictionary-environment";

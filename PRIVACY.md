@@ -83,6 +83,7 @@ The app does not sell or share data with anyone else.
 | Standard request metadata recorded by the hosting provider (IP address, time, path, user agent) | Vercel | 90 days at most |
 | Sign-in tokens and current organization ID | Your browser's `localStorage` | Until you sign out, the session expires, or you clear site data |
 | Preferences (key format, auto-format, delete column) | Your browser's `localStorage` | Until you clear site data |
+| Selected environment (the ID of the environment you picked; only when the app is opened from the Standalone extension point with several environments) | Your browser's `localStorage` | Until you clear site data |
 | Last selected site | A first-party cookie, `dictionary_selected_site` | One year |
 
 Log lines never contain tokens, API keys, secrets, phrases or translations.

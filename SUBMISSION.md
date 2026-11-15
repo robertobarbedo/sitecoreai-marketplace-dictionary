@@ -9,9 +9,9 @@ Dictionary Editor
 
 ## 2. Headline
 
-<!-- 406 chars -->
+<!-- 125 chars -->
 
-Manage a SitecoreAI site's dictionary on one screen. Browse entries by folder, see keys and phrases side by side in any language, find every entry missing a translation, edit all languages of an entry in one form, add entries with auto-generated keys, and publish the dictionary in one click. Optionally fill missing translations with OpenAI, Anthropic, Google or your own endpoint, reviewed before saving.
+Manage a site's dictionary on one screen: compare languages side by side, find missing translations and publish in one click.
 
 ## 3. Description
 
