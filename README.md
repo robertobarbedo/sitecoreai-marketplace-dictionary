@@ -19,6 +19,8 @@ provider you configure; nothing is saved until you review it.
 
 ![Entry list](docs/Entry%20list.png)
 
+![Every phrase of a site on one screen](.screenshots/1%20-%20Every%20phrase%20of%20a%20site%20on%20one%20screen.png)
+
 ## Features
 
 - **Site selector** — lists every site in the environment; the last choice is
@@ -101,6 +103,28 @@ sub-items included and related items excluded, to the Experience Edge target,
 in the base language and every language the editor shows (the languages
 selected in Settings, or the site's languages). The dialog lists them before
 you confirm.
+
+## Screenshots
+
+**1. Every phrase of a site on one screen**
+
+![Every phrase of a site on one screen](.screenshots/1%20-%20Every%20phrase%20of%20a%20site%20on%20one%20screen.png)
+
+**2. Find missing translations in one click**
+
+![Find missing translations in one click](.screenshots/2%20-%20Find%20missing%20translations%20in%20one%20click.png)
+
+**3. Publish all dictionary changes at once**
+
+![Publish all dictionary changes at once](.screenshots/3%20-%20Publish%20all%20dictionary%20changes%20at%20once.png)
+
+**4. Settings - Choose the languages for each site**
+
+![Settings - Choose the languages for each site](.screenshots/4%20-%20Settings%20-%20Choose%20the%20languages%20for%20each%20site.png)
+
+**5. Settings - Translate automatically with AI or Google Translate or a custom translation api**
+
+![Settings - Translate automatically with AI or Google Translate or a custom translation api](.screenshots/5%20-%20Settings%20-%20Translate%20automatically%20with%20AI%20or%20Google%20Translate%20or%20a%20custom%20translation%20api.png)
 
 ## Requirements
 
